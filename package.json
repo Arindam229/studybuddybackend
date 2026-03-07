@@ -1,7 +1,7 @@
 {
   "name": "studybuddy-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "StudyBuddy Node.js API - Production",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
