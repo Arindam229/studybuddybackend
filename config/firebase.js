@@ -13,15 +13,17 @@ function initFirebase() {
     try {
         let serviceAccount;
 
-        if (serviceAccountJson) {
-            // Primarily for production (Azure/Heroku/Vercel)
-            serviceAccount = JSON.parse(serviceAccountJson);
+        const rawValue = serviceAccountJson || serviceAccountPath;
+
+        if (rawValue && rawValue.trim().startsWith('{')) {
+            console.log("📍 Detected JSON string in environment variable. Attempting to parse...");
+            serviceAccount = JSON.parse(rawValue);
         } else if (serviceAccountPath) {
-            // Primarily for local development
+            console.log(`📍 Detected file path in FIREBASE_SERVICE_ACCOUNT_PATH: ${serviceAccountPath}`);
             const fullPath = path.resolve(process.cwd(), serviceAccountPath);
             serviceAccount = require(fullPath);
         } else {
-            console.warn("⚠️  Neither FIREBASE_SERVICE_ACCOUNT_JSON nor FIREBASE_SERVICE_ACCOUNT_PATH found. Firebase Admin will not be initialized.");
+            console.error("❌ ERROR: No valid Firebase credentials found. Ensure FIREBASE_SERVICE_ACCOUNT_JSON is set with JSON content.");
             return null;
         }
 
