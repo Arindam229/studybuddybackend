@@ -15,31 +15,43 @@ function initFirebase() {
 
         const rawValue = serviceAccountJson || serviceAccountPath;
 
-        if (rawValue && rawValue.trim().startsWith('{')) {
-            console.log("📍 Detected JSON string. Cleaning and parsing...");
-            try {
-                // Remove potential whitespace/newlines around the string and handle common escaping issues
-                const cleanedValue = rawValue.trim()
-                    .replace(/\\n/g, '\n') // Fix double-escaped newlines if they exist
-                    .replace(/\\"/g, '"'); // Fix escaped quotes if they exist
+        if (rawValue) {
+            const trimmed = rawValue.trim();
 
-                serviceAccount = JSON.parse(rawValue); // Try parsing original first
-            } catch (firstError) {
-                console.warn("⚠️  Direct JSON parse failed, attempting secondary cleanup...");
+            if (trimmed.startsWith('{')) {
+                console.log("📍 Detected JSON string. Cleaning and parsing...");
                 try {
-                    // Try to fix common "escaped newline" issues that Azure/Shells sometimes introduce
-                    const fixedValue = rawValue.trim().replace(/\\n/g, '\\\\n');
-                    serviceAccount = JSON.parse(fixedValue);
-                } catch (secondError) {
-                    console.error(`❌ JSON Parse Error at pos ${firstError.message.match(/\d+/)}:`, firstError.message);
-                    throw firstError; // Re-throw the original for visibility
+                    // Fix double-escaped newlines and problematic characters
+                    const cleaned = trimmed
+                        .replace(/\\n/g, '\n')
+                        .replace(/\\"/g, '"');
+                    serviceAccount = JSON.parse(cleaned);
+                } catch (e) {
+                    console.error("❌ Failed to parse JSON string:", e.message);
+                    throw e;
+                }
+            } else {
+                // Try Base64 fallback (safest for Cloud Env)
+                try {
+                    console.log("📍 String is not JSON. Attempting Base64 decode...");
+                    const decoded = Buffer.from(trimmed, 'base64').toString('utf8');
+                    if (decoded.startsWith('{')) {
+                        serviceAccount = JSON.parse(decoded);
+                        console.log("✅ Successfully decoded Base64 Firebase credentials.");
+                    } else {
+                        throw new Error("Decoded string is not a JSON object.");
+                    }
+                } catch (e) {
+                    console.error("❌ Failed to decode Base64 or string is invalid:", e.message);
                 }
             }
-        } else if (serviceAccountPath) {
+        }
+
+        if (!serviceAccount && serviceAccountPath) {
             console.log(`📍 Detected file path in FIREBASE_SERVICE_ACCOUNT_PATH: ${serviceAccountPath}`);
             const fullPath = path.resolve(process.cwd(), serviceAccountPath);
             serviceAccount = require(fullPath);
-        } else {
+        } else if (!serviceAccount) {
             console.error("❌ ERROR: No valid Firebase credentials found. Ensure FIREBASE_SERVICE_ACCOUNT_JSON is set with JSON content.");
             return null;
         }
