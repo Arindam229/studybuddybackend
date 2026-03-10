@@ -37,9 +37,10 @@ exports.handleUpload = async (req, res) => {
 
         // Save metadata to Cosmos DB
         const container = getContainer();
+        const docId = `doc_${Date.now()}`;
         if (container) {
             const doc = {
-                id: `doc_${Date.now()}`,
+                id: docId,
                 studentId: studentId,
                 type: 'document',
                 extracted_notes: extracted_notes,
@@ -68,7 +69,7 @@ exports.handleUpload = async (req, res) => {
             success: true,
             message: 'Image processed successfully.',
             data: {
-                id: doc.id,
+                id: docId,
                 extractedText: extracted_notes,
                 topic: topic,
                 summary: summary,
