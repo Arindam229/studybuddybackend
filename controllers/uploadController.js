@@ -68,6 +68,7 @@ exports.handleUpload = async (req, res) => {
             success: true,
             message: 'Image processed successfully.',
             data: {
+                id: doc.id,
                 extractedText: extracted_notes,
                 topic: topic,
                 summary: summary,
