@@ -7,10 +7,12 @@ const verifyToken = async (req, res, next) => {
     // Check if authorization header exists
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        console.log(`[AUTH DEBUG] Missing or invalid Authorization header for ${req.url}`);
         return res.status(401).json({ error: 'Unauthorized. No token provided.' });
     }
 
     const token = authHeader.split('Bearer ')[1];
+    console.log(`[AUTH DEBUG] Verifying token for ${req.url}...`);
 
     try {
         // Ensure Firebase SDK is initialized before checking
@@ -33,4 +35,4 @@ const verifyToken = async (req, res, next) => {
     }
 };
 
-module.exports = verifyToken;
+module.exports = { verifyToken };

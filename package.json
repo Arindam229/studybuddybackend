@@ -12,10 +12,18 @@
   "license": "ISC",
   "dependencies": {
     "@azure/cosmos": "^4.9.1",
+    "agora-access-token": "^2.0.4",
+    "agora-rtc-sdk-ng": "^4.24.2",
+    "axios": "^1.7.9",
+    "canvas": "^3.2.1",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "firebase-admin": "^13.7.0",
-    "multer": "^2.1.1"
+    "form-data": "^4.0.2",
+    "multer": "^2.1.1",
+    "pdfkit": "^0.17.2",
+    "socket.io": "^4.8.3",
+    "uuid": "^13.0.0"
   }
 }
