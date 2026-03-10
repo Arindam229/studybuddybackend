@@ -22,6 +22,7 @@ router.post('/chat', verifyToken, chatController.handleChat);
 router.get('/history', verifyToken, historyController.getHistory);
 router.get('/history/documents', verifyToken, historyController.getDocumentsHistory);
 router.get('/history/document/:id', verifyToken, historyController.getDocumentById);
+router.put('/history/document/:id', verifyToken, historyController.updateDocument);
 router.delete('/history', verifyToken, historyController.clearHistory);
 
 module.exports = router;

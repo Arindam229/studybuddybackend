@@ -162,3 +162,53 @@ exports.clearHistory = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error during history deletion.' });
     }
 };
+
+/**
+ * Update a specific document (e.g., flowchart updates).
+ */
+exports.updateDocument = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+        const container = getContainer();
+
+        if (!container) {
+            return res.status(500).json({ error: 'Database not initialized.' });
+        }
+
+        // 1. Fetch the existing document to get its partition key (studentId)
+        const { resources } = await container.items.query({
+            query: "SELECT * FROM c WHERE c.id = @id AND c.type = 'document'",
+            parameters: [{ name: "@id", value: id }]
+        }).fetchAll();
+
+        if (resources.length === 0) {
+            return res.status(404).json({ error: 'Document not found.' });
+        }
+
+        const existingDoc = resources[0];
+        const studentId = existingDoc.studentId;
+
+        // 2. Perform a partial update (merge updates)
+        const updatedDoc = {
+            ...existingDoc,
+            ...updates,
+            id: existingDoc.id, // Ensure ID doesn't change
+            studentId: existingDoc.studentId, // Ensure partition key doesn't change
+            updatedAt: new Date().toISOString()
+        };
+
+        // 3. Upsert the document
+        const { resource } = await container.items.upsert(updatedDoc);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Document updated successfully.',
+            document: resource
+        });
+
+    } catch (error) {
+        console.error("Update document error:", error.message);
+        return res.status(500).json({ error: 'Internal server error during document update.' });
+    }
+};
